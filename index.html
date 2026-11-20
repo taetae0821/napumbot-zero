@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>융통성 제로 AI 납품봇</title>
+<style>
+:root{--cream:#fff8e1;--yellow:#ffd54f;--sky:#81d4fa;--skyd:#0277bd;--ink:#263238;--ink2:#546e7a;--ok:#2e7d32;--warn:#e65100;--bad:#c62828;--card:#fff;--line:#455a64}
+*{box-sizing:border-box}
+html{font-size:18px}
+html.big{font-size:22px}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.skip{position:absolute;left:-9999px}.skip:focus{left:8px;top:8px;background:#fff;padding:8px;z-index:9}
+.top{display:flex;gap:6px;flex-wrap:wrap;justify-content:space-between;align-items:center;max-width:760px;margin:0 auto;padding:10px 14px 0}
+.brand{font-weight:800;font-size:.8rem;color:var(--ink2)}
+.tg{display:flex;gap:6px;flex-wrap:wrap}
+.tg button{min-height:48px;min-width:48px;padding:0 10px;font-size:.75rem;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+.tg button[aria-pressed=true]{background:var(--sky);font-weight:800}
+main{max-width:760px;margin:0 auto;padding:10px 14px 40px;outline:none}
+h1{font-size:1.7rem;line-height:1.25;margin:.4rem 0}
+h2{font-size:1.25rem;margin:.6rem 0 .3rem;outline:none}
+h3{font-size:1rem;margin:.8rem 0 .3rem}
+p{margin:.4rem 0}
+.panel{background:var(--card);border:3px solid var(--line);border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 4px 0 rgba(0,0,0,.12)}
+.panel.fact{background:#e1f5fe}
+.panel.warn{background:#fff3e0;border-color:var(--warn)}
+.chip{display:inline-block;background:var(--yellow);border:2px solid var(--line);border-radius:999px;padding:2px 12px;font-size:.78rem;font-weight:800}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;min-width:48px;padding:10px 18px;font-size:1rem;font-weight:800;border:3px solid var(--line);border-radius:14px;background:var(--yellow);color:var(--ink);cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.btn.sec{background:#fff}.btn.sky{background:var(--sky)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.choice:focus-visible,.tg button:focus-visible,.dot:focus-visible,.row:focus-visible{outline:4px solid #6a1b9a;outline-offset:2px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.choice{display:block;width:100%;min-height:64px;text-align:left;font-size:1rem;padding:12px 14px;margin:10px 0;border:3px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);cursor:pointer}
+.choice[aria-pressed=true]{background:#e1f5fe;border-color:var(--skyd);box-shadow:inset 0 0 0 3px var(--skyd);font-weight:800}
+.choice[aria-pressed=true]::before{content:"✔ 선택함 · ";color:var(--skyd)}
+.dots{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.dot{min-height:48px;min-width:48px;border:3px solid var(--line);border-radius:12px;background:#fff;font-weight:800;font-size:.9rem;cursor:pointer}
+.dot.cur{background:var(--yellow)}.dot.set{border-color:var(--skyd)}
+.dot.set::after{content:" ✔"}
+details{margin:8px 0}summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:800}
+ul{margin:.3rem 0;padding-left:1.3rem}li{margin:.25rem 0}
+.chars{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+.chr{width:92px;height:auto;flex:none}
+.say{flex:1;min-width:0;background:#fff;border:3px solid var(--line);border-radius:16px;padding:8px 12px;margin:6px 0;font-size:.95rem}
+.say b{display:block;font-size:.75rem;color:var(--ink2)}
+.say.z{background:#eceff1}.say.l{background:#e1f5fe}
+.scene{background:linear-gradient(#b3e5fc,#fff8e1);border:3px solid var(--line);border-radius:18px;min-height:150px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;text-align:center}
+.big-emoji{font-size:2.6rem;line-height:1.25;word-break:break-all;display:inline-block}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;border:2px solid var(--line);border-radius:8px;padding:0 8px;margin-right:6px;background:#fff}
+.t2{color:var(--ok);border-color:var(--ok)}.t1{color:var(--warn);border-color:var(--warn)}.t0{color:var(--bad);border-color:var(--bad)}
+.stars{font-size:2rem;letter-spacing:4px;color:#f9a825}
+.row{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:.95rem;cursor:pointer;color:var(--ink)}
+.row[aria-pressed=true]{background:#fffde7;border-color:var(--skyd)}
+.small{font-size:.8rem;color:var(--ink2)}
+.drive .chr{animation:drive 2.6s ease-in-out both}
+.pile .big-emoji{animation:pop .6s ease-out both,wob .5s .6s 3}
+.tall .big-emoji{animation:grow .9s ease-out both}
+.run .big-emoji,.slide .big-emoji,.queue .big-emoji{animation:dash 1.2s ease-in-out 2 alternate}
+.wobble .big-emoji,.lock .big-emoji,.heavy .big-emoji{animation:wob .5s 3}
+.books .big-emoji{animation:suck 1.2s ease-in}
+.stamp .big-emoji{animation:pop .5s ease-out both}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes grow{from{transform:scaleY(.2)}to{transform:scaleY(1)}}
+@keyframes dash{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+@keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes suck{from{transform:translateY(40px);opacity:.3}to{transform:translateY(0);opacity:1}}
+@keyframes drive{from{transform:translateX(-120px)}to{transform:translateX(0)}}
+html.calm *,html.calm *::before{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+canvas.sh,img.sh{width:100%;max-width:420px;height:auto;display:block;margin:10px auto;border:3px solid var(--line);border-radius:12px;background:#fff}
+@media (max-width:420px){h1{font-size:1.45rem}.chr{width:72px}.big-emoji{font-size:2.2rem}}
+</style>
+</head>
+<body>
+<a class="skip" href="#app">본문으로 건너뛰기</a>
+<div id="live" class="sr" aria-live="polite"></div>
+<div class="top" id="top"></div>
+<main id="app" tabindex="-1"></main>
+<noscript>이 게임은 JavaScript가 필요합니다.</noscript>
+<script>
+'use strict';
+/* ===== 데이터: 3라운드 × 5항목 × 3카드 (점수·핵심 표시는 결과 전까지 화면·접근성 이름에 노출하지 않음) ===== */
+/* 카드 형식: [점수, 문구, 결과, 유형, 핵심(1/0), 장면 이모지, 연출, 제로 대사] */
+const RAW=[
+{place:"햇살초등학교",thing:"책상",title:"필요한 만큼, 사용하는 사람에게 맞게",
+ req:"“1학년 교실 책상을 바꾸려고 해요. 아이들이 안전하게 쓰게 도와주세요.”",
+ facts:["학생은 30명이에요. 기존 책상 30개는 모두 교체 대상이에요.","의자 30개는 상태가 좋아서 그대로 쓸 수 있어요.","아이들 키가 서로 달라서 높이를 맞출 수 있어야 해요.","1학년 아이들이 쓰므로 모서리와 흔들림 안전이 중요해요.","개학은 14일 뒤예요. 교실 설치는 개학 3일 전까지 끝나야 해요.","사용하기 전에 수량·높이·안정성을 확인해야 해요."],
+ normal:{e:"🧒🪑📚🌞",cap:"아이들이 자기 키에 맞춘 책상에서 수업을 시작한다."},
+ learn:"필요한 물품을 필요한 만큼 구매하고, 실제 사용자와 사용 시점을 기준으로 조건을 정해요.",
+ items:[
+ {n:"수량·구성",h:"의자 상태와 학생 수를 다시 확인해 보세요.",c:[
+  [2,"책상 30개 구매, 의자는 기존 것 재사용","필요한 책상만 바꾸고 쓸 수 있는 의자를 남겼다."],
+  [1,"책상 30개와 의자 30개를 함께 새로 구매","자리 수는 맞지만 멀쩡한 의자까지 바꾸는 추가 구매가 생겼다.","구매조건",0,"🪑🪑🪑🪑🪑🪑","","의자도 새것으로 30개 가져왔습니다. 기존 의자는 창고로 갑니다."],
+  [0,"책상은 모자라지 않게 넉넉하게 준비","제로가 책상 3,000개를 가져와 교실 앞이 책상 산이 됐다.","구매조건",1,"🪑🪑🪑🪑🪑🪑🪑🪑🪑🪑","pile","넉넉하게라고 하셔서요. 3,000개면 충분하죠?"]]},
+ {n:"크기·높이",h:"아이들 키가 서로 다르다는 사실을 떠올려 보세요.",c:[
+  [2,"학생 키에 맞게 높이를 조절할 수 있는 책상","높이를 조절해 서로 다른 키의 학생에게 맞출 수 있다."],
+  [1,"가장 많은 키에 맞춘 한 가지 높이로 통일","일부 학생에게는 맞지만 모두에게 맞추기 어렵다.","물품·사용",0,"🧒🪑🧒","wobble","전원 같은 높이입니다. 공평하죠?"],
+  [0,"키가 큰 아이도 편하도록 아주 크게 제작","제로가 높이 3m 책상을 준비했다. 학생들이 올려다본다.","물품·사용",1,"🧒📏🪑","tall","키가 커도 편하시죠? 3미터입니다."]]},
+ {n:"안전·사용성",h:"1학년 아이들이 쓰는 책상이라는 점을 생각해 보세요.",c:[
+  [2,"모서리 마감과 흔들림을 확인할 기준 마련","모서리 처리와 안정성을 확인할 기준을 마련했다."],
+  [1,"모서리가 둥근지만 확인하고 점검 종료","모서리는 확인하지만 흔들림 등 안정성 확인이 남았다.","확인절차",0,"🪑🔧❓","","모서리는 동그랗습니다. 흔들림은… 지금 보겠습니다."],
+  [0,"넘어지지 않게 최대한 무겁고 튼튼하게 제작","제로가 이동도 어려운 초대형 철판 책상을 가져왔다.","물품·사용",1,"🪑⚙️🏗️","heavy","튼튼합니다. 저도 못 옮깁니다."]]},
+ {n:"납품·설치",h:"도착과 설치 완료는 다른 일이에요.",c:[
+  [2,"개학 3일 전까지 교실 안에 설치 완료","요청한 장소와 사용 준비 마감일을 명확히 정했다."],
+  [1,"개학 3일 전까지 학교 정문 앞에 도착","날짜는 맞지만 교실 운반·설치가 남아 있다.","납품·설치",0,"🚪📦🪑","","정문에 도착했습니다. 교실까지는 아직 남았습니다."],
+  [0,"날짜는 정하지 않고 준비되는 대로 도착","제로가 내년 개학 달력을 꺼낸다. 이번 개학에는 쓸 수 없다.","납품·설치",1,"🗓️📦❓","slide","준비되는 대로 왔습니다. 달력을 보니 내년이네요."]]},
+ {n:"검사·인수 계획",h:"무엇을 확인한 뒤 받을지 정해야 해요.",c:[
+  [2,"수량·높이·안정성을 확인한 뒤 인수","필요한 확인 항목을 정했다. 이상이 있으면 기록하고 조치를 요청한다."],
+  [1,"수량과 겉모습만 확인한 뒤 인수","수량은 확인하지만 실제 높이와 흔들림은 확인하지 않았다.","확인절차",0,"📋👀🪑","","겉모습은 좋습니다. 높이는 못 재 봤어요."],
+  [0,"상자 수만 세고 서류에 바로 도장","상자는 있지만 안의 상태는 미확인이다. 제로는 도장만 연달아 찍는다.","확인절차",1,"📦🖨️✅","stamp","상자 서른 개. 도장 서른 번."]]}]},
+{place:"바람숲도서관",thing:"청소기",title:"사용 환경에 맞게, 여러 업체에 공정하게",
+ req:"“다섯 구역을 청소할 청소기가 필요해요. 책을 읽는 분들을 방해하지 않았으면 해요.”",
+ facts:["5개 구역에서 동시에 청소해요. 무선 청소기 5대와 각각의 충전 자리가 필요해요.","청소할 곳은 바닥과 좁은 서가 틈새예요.","열람 시간은 09~18시, 청소는 열람이 끝난 18~19시에 할 수 있어요.","특정 업체나 색상이어야 할 업무상 이유는 없어요. 같은 성능의 여러 제품을 비교할 수 있어요.","고장이 났을 때의 수리 대응 계획도 필요해요."],
+ normal:{e:"🧹📚✨🌙",cap:"이용자가 떠난 뒤 청소를 마치고, 다음 날 쾌적하게 문을 연다."},
+ learn:"업무에 필요한 성능은 요구하되, 이유 없는 업체·외형 제한은 줄여 경쟁 기회를 열어요.",
+ items:[
+ {n:"수량·구성",h:"다섯 구역에서 동시에 쓰고 각각 충전해야 해요.",c:[
+  [2,"무선 청소기 5대, 구역별 개별 충전","다섯 구역에 배치하고 각각 충전할 수 있다."],
+  [1,"무선 청소기 5대, 충전기는 공용 1개","청소기는 다섯 대인데 충전 순서를 기다리는 줄이 생겼다.","구매조건",0,"🔌🧹🧹🧹🧹🧹","queue","충전기가 하나라서 줄을 서야 합니다."],
+  [0,"각 구역에서 쓸 청소기를 여러 대 준비","제로가 두 대만 가져왔다. 다섯 구역 동시 청소가 어렵다.","구매조건",1,"🧹🧹❓","","여러 대라고 하셔서 두 대 가져왔습니다."]]},
+ {n:"소음·운영",h:"열람 시간과 청소 가능 시간이 따로 정해져 있어요.",c:[
+  [2,"소음 성능 확인, 열람 종료 후 청소","이용자가 떠난 뒤 정해진 청소 시간에 작업한다."],
+  [1,"저소음 표시만 보고 열람 중에도 청소","표시만 믿고 운영해 실제 소음과 이용자 불편 확인이 남았다.","확인절차",0,"🔊🧹📚","","저소음이라고 적혀 있었는데요."],
+  [0,"이용자가 방해받지 않게 아무 소리도 없게","제로가 전원이 켜지지 않는 청소기를 가져왔다. 조용하지만 청소도 못 한다.","물품·사용",1,"🧹🔇❌","wobble","조용합니다. 켜지지도 않지만요."]]},
+ {n:"청소 범위",h:"바닥과 좁은 서가 틈을 모두 청소해야 해요.",c:[
+  [2,"바닥용과 서가 틈새용 도구를 함께 구성","정해진 두 공간에 맞는 청소 도구를 준비했다."],
+  [1,"넓은 바닥용 도구만 구성","바닥은 청소되지만 좁은 서가 틈새 작업이 남았다.","물품·사용",0,"🧹📚↔️","","바닥은 반짝, 서가 틈은 그대로입니다."],
+  [0,"눈에 보이는 것은 모두 청소되게 흡입력 최대","제로가 책까지 빨아들인다. 노즐에 책이 걸려 페이지가 펄럭인다.","물품·사용",0,"🧹📖📖📖","books","다 빨아들였습니다. 책도요."]]},
+ {n:"공정한 구매 조건",h:"이번 의뢰에는 특정 업체나 색상이어야 할 이유가 없어요.",c:[
+  [2,"필요 성능만 정하고 업체는 가리지 않음","성능을 기준으로 여러 제품을 비교할 기회를 열었다."],
+  [1,"필요 성능에 더해 같은 색상 제품만 허용","업무상 필요 없는 색상 조건이 선택 가능한 제품을 줄인다.","구매조건",0,"🎨🧹🔒","","색은 맞췄습니다. 고를 수 있는 제품은 줄었네요."],
+  [0,"이유 없이 한 회사 모델만 지정","제로가 같은 회사 카탈로그만 복사해 늘어놓는다. 비교 범위가 좁아졌다.","구매조건",1,"🏢📒📒📒","","카탈로그는 많습니다. 전부 같은 회사지만요."]]},
+ {n:"유지관리·보증",h:"보증 기간과 수리 대응 계획은 따로 살펴봐요.",c:[
+  [2,"보증 범위와 수리 대응 기준을 함께 명시","어떤 고장을 어떻게 접수하고 조치할지 확인할 수 있다."],
+  [1,"보증 기간 1년만 적고 구매","기간은 알지만 보증 범위와 수리 대응 기준은 추가 확인이 필요하다.","사후관리",0,"📅1️⃣🔧","","보증은 1년. 무엇을 고쳐 주는지는 모릅니다."],
+  [0,"고장 걱정 없게 절대 고장 나지 않는 제품","제로가 ‘영원 보증’ 팻말만 건넨다. 실제 고장 대응 계획은 없다.","사후관리",0,"🪧♾️","","영원 보증 팻말입니다. 수리 방법은 없습니다."]]}]},
+{place:"푸른구청 민원실",thing:"컴퓨터",title:"빠른 것은 바퀴가 아니라 업무 처리",
+ req:"“민원 업무용 컴퓨터 10대를 바꾸려고 해요. 빠르고 안전하게 쓸 수 있게 해 주세요.”",
+ facts:["10개 창구의 기존 본체는 모두 교체 대상이에요.","모니터·키보드·마우스는 새 본체와 호환되어 계속 쓸 수 있어요.","이와 별도로 공용 바코드 리더기 2개가 필요해요.","담당자가 정한 시험 환경에서 대표 업무 화면이 3초 안에 열리는지 확인해요. (이 의뢰에서 합의한 가상의 시험 조건이에요.)","담당자별로 접근을 관리해야 하고, 설치 뒤 업무 시연이 필요해요."],
+ normal:{e:"🖥️🧑‍💼😊🙂",cap:"담당자가 업무를 처리하고 민원인의 대기 흐름이 원활해진다."},
+ learn:"기존 장비를 확인하고, 실제 업무 수행과 안전한 사용을 기준으로 구매·설치 결과를 확인해요.",
+ items:[
+ {n:"본체 수량",h:"바꿔야 할 본체는 열 대예요.",c:[
+  [2,"본체 10대 구매, 모든 창구 교체","열 개 창구에 필요한 교체 수량을 맞췄다."],
+  [1,"본체 8대 구매, 나머지 2대는 기존 사용","여덟 창구만 교체되고 교체 대상 두 대가 남았다.","구매조건",0,"🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️📟📟","","여덟 대 교체했습니다. 두 창구는 옛날 그대로입니다."],
+  [0,"창구마다 모자라지 않게 넉넉히 구매","제로가 본체 100대를 끌고 와 민원실이 상자로 가득 찼다.","구매조건",1,"🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️","pile","100대입니다. 창구는 열 개지만요."]]},
+ {n:"업무 성능",h:"사양표뿐 아니라 정해진 업무 시험을 확인해요.",c:[
+  [2,"대표 업무 화면 3초 이내 시험으로 확인","합의한 시험 환경에서 업무 응답 성능을 확인할 기준이 생겼다."],
+  [1,"메모리·저장 용량 숫자만 확인","부품 정보는 있지만 실제 업무 응답 시간은 확인되지 않았다.","확인절차",0,"📊🖥️❓","","숫자는 훌륭합니다. 화면이 몇 초에 열리는지는 모릅니다."],
+  [0,"민원인이 기다리지 않게 최대한 빠르게","제로가 컴퓨터에 바퀴를 달았다. 본체가 창구 사이로 달아난다.","물품·사용",1,"🖥️🛞💨","run","빠르죠? 저도 따라잡기 어렵습니다."]]},
+ {n:"주변 장비",h:"멀쩡한 장비와 새로 필요한 장비를 구분해요.",c:[
+  [2,"기존 주변기기는 재사용, 리더기 2개 추가","사용 가능한 장비를 남기고 필요한 공용 리더기만 추가했다."],
+  [1,"기존 주변기기 재사용, 추가 구매는 없음","재사용은 적절하지만 요청한 공용 리더기 두 개가 빠졌다.","구매조건",0,"🖱️⌨️❓","","리더기 두 개는… 빠뜨렸습니다."],
+  [0,"주변 장비도 종류별로 모두 새것으로","제로가 모니터·프린터·스피커·선풍기까지 늘어놓는다. 불필요한 구매다.","구매조건",0,"🖥️🖨️🔊🌀","","모니터, 프린터, 스피커, 선풍기까지 새것입니다."]]},
+ {n:"정보 보호·이용",h:"안전하게 보호하면서 담당자는 업무에 쓸 수 있어야 해요.",c:[
+  [2,"개별 계정·접근 권한·자료 암호화 설정","누가 어떤 자료를 사용할지 관리하는 기본 조건을 정했다."],
+  [1,"화면 잠금 기능만 설정","잠금 기능은 있지만 담당자별 접근 관리 조건이 부족하다.","구매조건",0,"🔒🖥️🧑‍💼","","화면은 잠겼습니다. 누가 어떤 자료를 보는지는 모릅니다."],
+  [0,"외부인이 절대 못 쓰도록 철저하게 잠금","제로가 본체를 금고에 넣고 문을 잠갔다. 담당자도 업무에 쓸 수 없다.","물품·사용",1,"🔐🖥️🏦","lock","완벽하게 잠갔습니다. 저도 못 씁니다."]]},
+ {n:"설치·확인",h:"전원이 켜지는 것과 실제 업무가 되는 것은 달라요.",c:[
+  [2,"창구 설치와 업무 시연을 확인한 뒤 인수","배치와 작동을 확인하고 실제 업무 조건을 대조할 계획을 세웠다."],
+  [1,"창구 설치와 전원 켜짐만 확인한 뒤 인수","설치는 확인했지만 업무 프로그램과 주변기기 확인이 남았다.","확인절차",0,"🔌🖥️❓","","전원은 켜집니다. 업무 프로그램은 아직 모릅니다."],
+  [0,"민원실 입구에 상자째 쌓아 두고 인수","제로가 상자를 쌓고 돌아간다. 창구 설치는 끝나지 않았다.","납품·설치",0,"📦📦📦🚪","pile","상자는 입구까지 가져왔습니다. 그 뒤는 비밀입니다."]]}]}
+];
+const KIND_NOTE={"구매조건":"물건이 고장 났다는 뜻이 아니라, 필요한 것보다 많거나 적거나 경쟁을 좁히는 조건이라는 뜻이에요.","물품·사용":"그림처럼 쓰기 어려운 물건이 되는 사용상의 문제예요.","납품·설치":"도착한 장소와 사용할 수 있게 된 시점의 문제예요.","확인절차":"물건이 불량이라는 뜻이 아니라, 아직 확인하지 못한 항목이 있다는 뜻이에요.","사후관리":"사고 난 뒤의 대응 계획이 부족하다는 뜻이에요."};
+const LULU_KIND={"구매조건":"필요한 만큼, 이유 있는 조건만 정해 봐요.","물품·사용":"쓰는 사람이 실제로 쓸 수 있는 물건이어야 해요.","납품·설치":"도착했다는 것과 쓸 수 있게 준비됐다는 건 달라요.","확인절차":"무엇을 확인하고 받을지 정하면 문제를 미리 찾을 수 있어요.","사후관리":"고장 난 뒤의 대응 계획도 중요한 조건이에요."};
+const ROUNDS=RAW.map((R,ri)=>({...R,idx:ri,items:R.items.map((it,ii)=>({n:it.n,h:it.h,cards:it.c.map(a=>({
+  id:"r"+(ri+1)+"_s"+(ii+1)+"_"+a[0],r:ri,i:ii,s:a[0],t:a[1],o:a[2],k:a[3]||"적합",crit:!!a[4],e:a[5]||"",a:a[6]||"",zq:a[7]||""}))}))}));
+const BY_ID={};ROUNDS.forEach(R=>R.items.forEach(it=>it.cards.forEach(c=>BY_ID[c.id]=c)));
+
+/* ===== 판정 ===== */
+function evaluate(picks){
+  if(picks.length!==5||picks.some(c=>!c))throw new Error("다섯 항목을 모두 선택하세요.");
+  const score=picks.reduce((s,c)=>s+c.s,0);
+  const issues=picks.filter(c=>c.s<2);
+  const criticals=issues.filter(c=>c.crit);
+  const stars=criticals.length?1:score===10?3:score>=6?2:1;
+  const lead=criticals[0]||issues.find(c=>c.s===0)||issues[0]||null;
+  return{score,stars,issues,criticals,lead,leadId:lead?lead.id:null};
+}
+const STAR_NAME={3:"목적에 맞는 구매",2:"조건 보완 필요",1:"구매 계획 다시 보기"};
+function gradeOf(t){return t>=8?"조달 마스터":t>=6?"꼼꼼한 담당자":"새내기 담당자";}
+
+/* ===== 상태 ===== */
+const S={screen:"start",round:0,step:0,picks:[null,null,null,null,null],order:[],best:[null,null,null],seen:[],attempt:0,phase:"idle",snap:null,res:null,shown:null,hint:false,fromEnd:false,confirmReset:false,shareUrl:"",opt:{sound:true,big:false,calm:false},focus:null};
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function newRound(r,keepPicks){S.round=r;S.step=0;S.hint=false;S.phase="idle";if(!keepPicks)S.picks=[null,null,null,null,null];S.order=ROUNDS[r].items.map(()=>shuffle([0,1,2]));}
+
+/* ===== 소리 ===== */
+let AC=null;
+function tone(f,d,type,v,delay){if(!S.opt.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type||"sine";o.frequency.value=f;o.connect(g);g.connect(AC.destination);const t=AC.currentTime+(delay||0);g.gain.setValueAtTime(v||.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.03);}catch(e){}}
+const SFX={click(){tone(660,.07,"square",.04)},good(){[523,659,784].forEach((f,i)=>tone(f,.18,"triangle",.07,i*.1))},mid(){tone(440,.15,"triangle",.06);tone(392,.2,"triangle",.06,.12)},bad(){tone(300,.18,"sawtooth",.05);tone(200,.3,"sawtooth",.05,.15)},stamp(){tone(120,.12,"square",.08)}};
+
+/* ===== 캐릭터(오리지널, SVG) ===== */
+function zero(m){const mouth=m==="oops"?'<path d="M50 70 q10 -8 20 0" stroke="#81d4fa" stroke-width="3" fill="none"/>':'<path d="M50 66 q10 8 20 0" stroke="#81d4fa" stroke-width="3" fill="none"/>';
+return '<svg class="chr" viewBox="0 0 120 140" role="img" aria-label="제로, 둥근 흰색 납품 로봇"><line x1="60" y1="10" x2="60" y2="26" stroke="#455a64" stroke-width="4"/><circle cx="60" cy="8" r="6" fill="#ff7043"/><rect x="20" y="26" width="80" height="62" rx="26" fill="#fff" stroke="#455a64" stroke-width="4"/><rect x="32" y="40" width="56" height="34" rx="12" fill="#263238"/><circle cx="48" cy="54" r="5" fill="#81d4fa"/><circle cx="72" cy="54" r="5" fill="#81d4fa"/>'+mouth+'<rect x="28" y="92" width="64" height="40" rx="10" fill="#ffd54f" stroke="#455a64" stroke-width="4"/><line x1="28" y1="108" x2="92" y2="108" stroke="#455a64" stroke-width="3"/></svg>';}
+function lulu(){return '<svg class="chr" viewBox="0 0 120 140" role="img" aria-label="루루, 하늘색 머리에 리본을 단 안내자"><ellipse cx="60" cy="52" rx="42" ry="44" fill="#4fc3f7"/><circle cx="60" cy="58" r="30" fill="#ffe0b2" stroke="#455a64" stroke-width="3"/><path d="M30 50 q30 -34 60 0 q-30 -10 -60 0z" fill="#4fc3f7"/><circle cx="49" cy="60" r="4" fill="#263238"/><circle cx="71" cy="60" r="4" fill="#263238"/><path d="M52 72 q8 7 16 0" stroke="#c62828" stroke-width="3" fill="none"/><path d="M84 22 l16 -8 l0 22z M84 22 l-4 -10 l-4 22z" fill="#e53935" stroke="#455a64" stroke-width="2"/><rect x="30" y="96" width="60" height="38" rx="10" fill="#fff" stroke="#455a64" stroke-width="3"/><rect x="52" y="96" width="16" height="38" fill="#4fc3f7"/></svg>';}
+function bubble(who,txt){return '<div class="say '+(who==="제로"?"z":"l")+'"><b>'+who+'</b>'+txt+'</div>';}
+function stars(n){return '<span class="stars" role="img" aria-label="별 '+n+'개">'+"★".repeat(n)+"☆".repeat(3-n)+'</span>';}
+function scene(e,a,cap,label){return '<div class="scene '+a+'"><span class="big-emoji" aria-hidden="true">'+e+'</span></div>'+(label?'<p class="small">'+label+'</p>':'')+'<p>'+cap+'</p>';}
+
+/* ===== 화면 ===== */
+function topBar(){document.getElementById("top").innerHTML='<span class="brand">융통성 제로 AI 납품봇</span><span class="tg"><button data-a="tsound" aria-pressed="'+S.opt.sound+'">소리 '+(S.opt.sound?"켬":"끔")+'</button><button data-a="tbig" aria-pressed="'+S.opt.big+'">글자 크게</button><button data-a="tcalm" aria-pressed="'+S.opt.calm+'">동작 줄이기</button></span>';}
+function vStart(){return '<h1 tabindex="-1">융통성 제로<br>AI 납품봇</h1><p><span class="chip">2026 조달청 AI 게임·콘텐츠 공모전</span></p><div class="chars">'+zero("oops")+lulu()+'</div><div class="panel"><p>“주문한 대로 왔다고? 이게 뭐야!”</p><p>글자 그대로만 알아듣는 AI 납품봇 <b>제로</b>에게 구매 조건을 골라 주고, 웃으며 실패하며 다시 고쳐 보세요. 학교·도서관·민원실 3개 의뢰, 한 번에 5개 조건을 고릅니다. 전체 약 4~6분.</p><p class="small">이 게임은 AI를 활용해 제작했습니다. 기관·수치·장면은 모두 가상 설정이며 실제 조달 규정이나 법률 판단이 아닙니다. 새로고침하면 기록이 사라지고, 이름·연락처는 수집하지 않습니다.</p></div><div class="btns"><button class="btn" data-a="start">게임 시작</button></div>';}
+function vIntro(){return '<h2 tabindex="-1">연습 시뮬레이션</h2><p class="small">연습이라서 점수와 기록에 들어가지 않아요.</p>'+scene("✏️✏️✏️✏️✏️✏️✏️✏️✏️✏️","pile","연필 3,000자루가 교실 앞에 쌓였다.")+'<div class="chars">'+zero("oops")+lulu()+'</div>'+bubble("제로","“넉넉하게”라고 하셔서요. 연필 3,000자루면 충분하죠?")+bubble("루루","한 반에 이렇게나 필요할까요? 필요한 수부터 확인해요!")+bubble("제로","저는 제로. 조건은 읽는데, 가끔 뜻을 엉뚱하게 받아들입니다.")+bubble("루루","오늘은 학교, 도서관, 민원실의 구매를 도와요.")+'<div class="btns"><button class="btn" data-a="brief">첫 의뢰 받기</button><button class="btn sec" data-a="brief">건너뛰기</button></div>';}
+function vBrief(){const R=ROUNDS[S.round];return '<p><span class="chip">의뢰 '+(S.round+1)+'/3</span> <span class="chip">'+R.place+' · '+R.thing+'</span></p><h2 tabindex="-1">'+R.title+'</h2><div class="panel"><p><b>'+R.req+'</b></p></div><div class="panel fact"><h3>먼저 알아 둘 사실</h3><ul>'+R.facts.map(f=>'<li>'+f+'</li>').join("")+'</ul></div><div class="chars">'+lulu()+'</div>'+bubble("루루","사실을 잘 읽고, 다섯 가지 조건을 골라 주세요. 발주 전에는 얼마든지 바꿀 수 있어요.")+'<div class="btns"><button class="btn" data-a="write">조건 작성 시작</button></div>';}
+function allPicked(){return S.picks.every(p=>p);}
+function vWrite(){const R=ROUNDS[S.round],it=R.items[S.step],ord=S.order[S.step];
+ const missing=R.items.map((x,i)=>S.picks[i]?null:x.n).filter(Boolean);
+ const dots=R.items.map((x,i)=>'<button class="dot'+(i===S.step?" cur":"")+(S.picks[i]?" set":"")+'" data-a="goto" data-i="'+i+'" aria-label="항목 '+(i+1)+' '+x.n+(S.picks[i]?" 선택함":" 아직 선택 안 함")+(i===S.step?" 현재":"")+'">'+(i+1)+'</button>').join("");
+ const cards=ord.map(ci=>{const c=it.cards[ci];return '<button class="choice" data-a="pick" data-c="'+ci+'" aria-pressed="'+(S.picks[S.step]===c.id)+'">'+c.t+'</button>';}).join("");
+ const last=S.step===4;
+ return '<p><span class="chip">의뢰 '+(S.round+1)+'/3 · '+R.place+'</span></p><h2 tabindex="-1">항목 '+(S.step+1)+'/5 · '+it.n+'</h2><div class="dots" role="group" aria-label="항목 이동">'+dots+'</div><details><summary>의뢰와 사실 다시 보기</summary><div class="panel fact"><p><b>'+R.req+'</b></p><ul>'+R.facts.map(f=>'<li>'+f+'</li>').join("")+'</ul></div></details><div role="group" aria-label="'+it.n+' 조건 카드">'+cards+'</div>'+(S.picks[S.step]?bubble("제로","조건을 기록했습니다. 발주 전까지 바꿀 수 있습니다."):"")+'<div class="btns"><button class="btn sky" data-a="hint" aria-expanded="'+S.hint+'">루루에게 묻기</button></div>'+(S.hint?bubble("루루",it.h+" (힌트는 몇 번 써도 괜찮아요.)"):"")+'<div class="btns">'+(S.step>0?'<button class="btn sec" data-a="prev">이전</button>':"")+(last?'<button class="btn" data-a="review"'+(allPicked()?"":" disabled")+'>발주 검토</button>':'<button class="btn" data-a="next">다음</button>')+'</div>'+(last&&!allPicked()?'<p class="small">아직 고르지 않은 항목: '+missing.join(", ")+'</p>':"");}
+function vReview(){const R=ROUNDS[S.round];
+ return '<p><span class="chip">의뢰 '+(S.round+1)+'/3 · '+R.place+'</span></p><h2 tabindex="-1">발주 전 확인</h2><p>고른 조건을 확인하세요. 확정하면 제로가 납품을 시작해요.</p>'+R.items.map((it,i)=>'<div class="panel"><b>'+it.n+'</b><br>'+BY_ID[S.picks[i]].t+'<div class="btns"><button class="btn sec" data-a="edit" data-i="'+i+'">이 항목 수정</button></div></div>').join("")+'<div class="btns"><button class="btn sec" data-a="edit" data-i="0">수정하기</button><button class="btn" data-a="order">발주 확정</button></div>';}
+function vDeliver(){return '<h2 tabindex="-1">납품 중…</h2><div class="drive">'+scene("📦🚚💨","","제로가 조건을 글자 그대로 읽고 물건을 가져오는 중이에요.")+'<div class="chars">'+zero("oops")+'</div></div><div class="btns"><button class="btn sec" data-a="skipdel">연출 건너뛰기</button></div>';}
+function rowHtml(c,i,sel){const t=c.s===2?'<span class="tag t2">✅ 적합</span>':c.s===1?'<span class="tag t1">△ 보완 필요</span>':'<span class="tag t0">✖ 큰 문제</span>';
+ return '<button class="row" data-a="scene" data-i="'+i+'" aria-pressed="'+(sel===i)+'"><b>'+ROUNDS[c.r].items[c.i].n+'</b> '+t+(c.crit?'<span class="tag t0">핵심</span>':'')+'<br>'+c.t+'<br><span class="small">'+c.o+'</span></button>';}
+function vResult(){const r=S.res,R=ROUNDS[r.round],picks=r.picks;
+ const sel=S.shown==null?(r.lead?picks.indexOf(r.lead):-1):S.shown;
+ const c=sel>=0?picks[sel]:null;
+ let sc;
+ if(c&&c.s<2)sc=scene(c.e,c.a,c.o,"이 조건의 결과 예시 · 선택한 조건: “"+c.t+"”")+(c.zq?bubble("제로","“"+c.zq+"”"):"")+bubble("루루",LULU_KIND[c.k]);
+ else sc=scene(R.normal.e,"",R.normal.cap,c?"이 조건의 결과 예시 · 선택한 조건: “"+c.t+"”":"")+bubble("제로","이번에는 현장에 맞는 조건입니다.")+bubble("루루","필요한 만큼, 제대로 쓸 수 있게 준비했어요!");
+ const crit=r.criticals.length?'<div class="panel warn"><b>핵심 조건 때문에 별이 1개로 제한됐어요.</b><br>다른 조건이 맞아도 아래 “핵심” 표시 항목 때문에 사용이나 확인에 큰 문제가 생겨요.</div>':"";
+ const kindNote=c&&c.s<2?'<p class="small">'+c.k+' · '+KIND_NOTE[c.k]+'</p>':"";
+ const last=S.round===2||S.fromEnd;
+ return '<p><span class="chip">의뢰 '+(r.round+1)+'/3 · '+R.place+'</span></p><h2 tabindex="-1">결과: '+STAR_NAME[r.stars]+'</h2><p>'+stars(r.stars)+' &nbsp;<b>'+r.score+' / 10점</b></p>'+crit+sc+kindNote+'<p class="small">이 장면은 가상의 과장된 예시예요. 점수는 구매 계획의 적합도이며, 낮은 점수가 곧 물품 하자를 뜻하지는 않아요.</p><h3>내가 고른 5개 조건 (눌러서 장면 보기)</h3>'+picks.map((p,i)=>rowHtml(p,i,sel)).join("")+'<div class="panel fact"><b>배운 점</b><br>'+R.learn+'</div><div class="btns"><button class="btn sec" data-a="fix">조건 고치기</button><button class="btn sec" data-a="again">새로 풀기</button><button class="btn" data-a="nextr">'+(last?"마무리 보기":"다음 의뢰")+'</button></div>';}
+function totalStars(){return S.best.reduce((s,b)=>s+(b?b.stars:0),0);}
+function vEnd(){const t=totalStars(),g=gradeOf(t);
+ return '<h2 tabindex="-1">마무리</h2><div class="chars">'+zero("happy")+lulu()+'</div><div class="panel"><p>나의 조달 등급</p><h1>'+g+'</h1><p>최고 기록 별 합계 '+t+' / 9</p>'+S.best.map((b,i)=>'<p>'+ROUNDS[i].place+" · "+ROUNDS[i].thing+' '+(b?stars(b.stars)+' ('+b.score+'점)':"미도전")+'</p>').join("")+'</div><div class="panel fact"><h3>오늘 기억할 세 가지</h3><ul><li>필요한 물건과 수량을 먼저 확인해요.</li><li>업무에 필요한 조건을 정하고, 이유 없는 제한은 줄여요.</li><li>받은 물건이 약속한 조건에 맞는지 확인해요.</li></ul><p><b>좋은 조달은 물건을 많이 사는 일이 아니라, 필요한 사람이 제대로 쓰게 하는 일입니다.</b></p></div><h3>다시 도전 (최고 기록과 발견 기록은 유지돼요)</h3><div class="btns">'+ROUNDS.map((R,i)=>'<button class="btn sec" data-a="replay" data-r="'+i+'">의뢰 '+(i+1)+' 다시</button>').join("")+'</div><div class="panel"><p>조달청은 공공기관의 물품·용역 조달을 지원하고 전자조달 시스템 나라장터를 운영해요. 이 게임은 입찰·계약·대금 지급을 생략한 가상 체험이며, 모든 기관이 같은 방식으로 구매하는 것은 아니에요.</p><p class="small">공공조달에 대해 더 알고 싶다면 조달청·나라장터 공식 안내를 확인하세요. 아래 링크는 누를 때만 열리며 인터넷 연결이 필요해요.</p><p><a href="https://www.pps.go.kr" target="_blank" rel="noopener">조달청 누리집</a> · <a href="https://www.g2b.go.kr" target="_blank" rel="noopener">나라장터</a></p><details><summary>더 알아보기: 혁신제품 시범구매</summary><p>조달청은 지정된 혁신제품을 구매해 공공기관의 현장 사용과 평가·피드백을 지원하는 시범구매 사업을 운영해요. 새로운 기술이 현장에서 도움이 되는지 살펴보는 과정이에요. 이 게임 본편의 컴퓨터 구매가 그 사업이라는 뜻은 아니에요.</p></details></div><div class="btns"><button class="btn sky" data-a="share">공유 카드 만들기</button><button class="btn sec" data-a="reset">'+(S.confirmReset?"정말 처음부터? 기록이 모두 지워져요":"처음부터")+'</button></div>';}
+function vShare(){return '<h2 tabindex="-1">공유 카드</h2><img class="sh" alt="공유 카드 미리보기: 등급과 라운드별 별점" src="'+S.shareUrl+'"><p class="small">모바일에서 저장이 안 되면 이미지를 길게 눌러 저장하세요.</p><div class="btns"><button class="btn" data-a="savesh">이미지 저장</button><button class="btn sec" data-a="closesh">닫기</button></div>';}
+
+/* ===== 렌더 ===== */
+const VIEWS={start:vStart,intro:vIntro,brief:vBrief,write:vWrite,review:vReview,deliver:vDeliver,result:vResult,end:vEnd,share:vShare};
+function render(announce){
+ document.documentElement.classList.toggle("big",S.opt.big);document.documentElement.classList.toggle("calm",S.opt.calm);
+ topBar();const app=document.getElementById("app");app.innerHTML=VIEWS[S.screen]();
+ if(S.focus){const el=app.querySelector(S.focus);S.focus=null;if(el){el.focus();return;}}
+ const h=app.querySelector("h1,h2");if(h){h.setAttribute("tabindex","-1");h.focus({preventScroll:false});}
+ if(announce)document.getElementById("live").textContent=announce;
+ window.scrollTo(0,0);
+}
+function go(screen,announce){S.screen=screen;render(announce);}
+
+/* ===== 진행 ===== */
+function finish(id){
+ if(id!==S.attempt||S.phase!=="delivery")return;
+ S.phase="result";const picks=S.snap.map(x=>BY_ID[x]);const ev=evaluate(picks);
+ S.res={round:S.round,picks,...ev};
+ const b=S.best[S.round];if(!b||ev.stars>b.stars||(ev.stars===b.stars&&ev.score>b.score))S.best[S.round]={stars:ev.stars,score:ev.score,ids:S.snap.slice()};
+ picks.forEach(c=>{if(c.s<2&&!S.seen.some(x=>x.id===c.id))S.seen.push({id:c.id,s:c.s});});
+ S.shown=null;S.hint=false;
+ (ev.stars===3?SFX.good:ev.stars===2?SFX.mid:SFX.bad)();
+ go("result","결과: 별 "+ev.stars+"개, "+ev.score+"점");
+}
+function shareLine(){const z=S.seen.find(x=>x.s===0),o=z||S.seen[0];return o?BY_ID[o.id].o:"이번 플레이에서 발견한 문제 없음";}
+function wrap(ctx,text,x,y,maxW,lh){let line="",yy=y;for(const ch of text){const t=line+ch;if(ctx.measureText(t).width>maxW&&line&&!/[.,!?)」”]/.test(ch)){ctx.fillText(line,x,yy);line=ch;yy+=lh;}else line=t;}ctx.fillText(line,x,yy);return yy+lh;}
+function makeShare(){
+ const cv=document.createElement("canvas");cv.width=1080;cv.height=1350;const x=cv.getContext("2d");
+ x.fillStyle="#fff8e1";x.fillRect(0,0,1080,1350);x.fillStyle="#81d4fa";x.fillRect(0,0,1080,220);
+ x.fillStyle="#263238";x.textAlign="center";x.font="bold 76px sans-serif";x.fillText("융통성 제로 AI 납품봇",540,130);
+ x.font="36px sans-serif";x.fillText("2026 조달청 AI 게임·콘텐츠 공모전",540,190);
+ const t=totalStars();x.font="bold 40px sans-serif";x.fillText("나의 조달 등급",540,330);
+ x.fillStyle="#e65100";x.font="bold 110px sans-serif";x.fillText(gradeOf(t),540,450);
+ x.fillStyle="#263238";x.font="bold 44px sans-serif";x.fillText("최고 기록 별 합계 "+t+" / 9",540,540);
+ x.textAlign="left";x.font="40px sans-serif";let y=640;
+ S.best.forEach((b,i)=>{x.fillText(ROUNDS[i].place+" · "+ROUNDS[i].thing,120,y);x.fillStyle="#f9a825";x.fillText(b?"★".repeat(b.stars)+"☆".repeat(3-b.stars):"미도전",760,y);x.fillStyle="#263238";y+=80;});
+ x.font="bold 38px sans-serif";x.fillText("발견한 사건",120,y+30);x.font="36px sans-serif";y=wrap(x,shareLine(),120,y+90,840,52);
+ if(S.best.every(b=>b&&b.score===10)){x.fillStyle="#2e7d32";x.font="bold 40px sans-serif";x.fillText("최고 기록 전 라운드 만점",120,y+30);x.fillStyle="#263238";}
+ x.textAlign="center";x.font="30px sans-serif";x.fillStyle="#546e7a";x.fillText("이 게임은 AI를 활용해 제작한 가상 체험입니다.",540,1290);
+ return cv.toDataURL("image/png");
+}
+
+/* ===== 이벤트 ===== */
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-a]");if(!b||b.disabled)return;const a=b.dataset.a;
+ if(a==="tsound"){S.opt.sound=!S.opt.sound;S.focus='[data-a=tsound]';render();return;}
+ if(a==="tbig"){S.opt.big=!S.opt.big;S.focus='[data-a=tbig]';render();return;}
+ if(a==="tcalm"){S.opt.calm=!S.opt.calm;S.focus='[data-a=tcalm]';render();return;}
+ SFX.click();
+ switch(a){
+ case "start":go("intro");break;
+ case "brief":newRound(0);go("brief");break;
+ case "write":S.step=0;go("write");break;
+ case "pick":{const it=ROUNDS[S.round].items[S.step];S.picks[S.step]=it.cards[+b.dataset.c].id;S.focus='.choice[aria-pressed=true]';render("조건을 기록했습니다.");break;}
+ case "goto":S.step=+b.dataset.i;S.hint=false;go("write");break;
+ case "prev":S.step=Math.max(0,S.step-1);S.hint=false;go("write");break;
+ case "next":S.step=Math.min(4,S.step+1);S.hint=false;go("write");break;
+ case "hint":S.hint=!S.hint;S.focus='[data-a=hint]';render();break;
+ case "review":if(allPicked())go("review");break;
+ case "edit":S.step=+b.dataset.i;S.hint=false;go("write");break;
+ case "order":{if(!allPicked()||S.phase==="delivery")break;S.phase="delivery";S.attempt++;S.snap=S.picks.slice();const id=S.attempt;go("deliver");setTimeout(()=>finish(id),S.opt.calm?600:2800);break;}
+ case "skipdel":finish(S.attempt);break;
+ case "scene":S.shown=+b.dataset.i;S.focus='.row[aria-pressed=true]';render();break;
+ case "fix":S.step=0;S.phase="idle";S.hint=false;go("write");break;
+ case "again":newRound(S.round);go("write");break;
+ case "nextr":if(S.fromEnd||S.round===2){S.fromEnd=false;go("end");}else{newRound(S.round+1);go("brief");}break;
+ case "replay":S.fromEnd=true;newRound(+b.dataset.r);go("brief");break;
+ case "share":S.shareUrl=makeShare();go("share");break;
+ case "savesh":{const l=document.createElement("a");l.href=S.shareUrl;l.download="napumbot_share.png";document.body.appendChild(l);l.click();l.remove();break;}
+ case "closesh":go("end");break;
+ case "reset":if(!S.confirmReset){S.confirmReset=true;S.focus='[data-a=reset]';render();}else{S.confirmReset=false;S.best=[null,null,null];S.seen=[];S.fromEnd=false;newRound(0);go("start");}break;
+ }
+});
+window.NAPUM={ROUNDS,BY_ID,evaluate,S};
+render();
+</script>
+</body>
+</html>
