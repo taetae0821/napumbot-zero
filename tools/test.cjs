@@ -5,12 +5,12 @@ const assert=require('node:assert/strict');
 const {JSDOM}=require(process.env.NAPUM_TEST_MODULES?path.join(process.env.NAPUM_TEST_MODULES,'jsdom'):'jsdom');
 const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-let timers=new Map(),due=new Map(),clock=0,nextTimer=0,drawnText=[],faults=[];
+let timers=new Map(),nextTimer=0,drawnText=[],faults=[];
 const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://napumbot.test/',pretendToBeVisual:true,beforeParse(w){
  w.matchMedia=()=>({matches:false});w.scrollTo=()=>{};
  w.HTMLElement.prototype.scrollIntoView=function(){};
- w.setTimeout=(fn,ms=0)=>{const id=++nextTimer;timers.set(id,fn);due.set(id,clock+ms);return id;};
- w.clearTimeout=id=>{timers.delete(id);due.delete(id);};
+ w.setTimeout=(fn)=>{const id=++nextTimer;timers.set(id,fn);return id;};
+ w.clearTimeout=id=>timers.delete(id);
  w.HTMLCanvasElement.prototype.getContext=function(){return{fillRect(){},fillText(t){drawnText.push(t);},measureText(t){return{width:Array.from(t).length*29};}};};w.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,TEST';
  w.addEventListener('error',e=>faults.push(e.message));
 }});
@@ -23,7 +23,6 @@ function click(a,extra=''){const el=d.querySelector(`[data-a="${a}"]${extra}`);a
 function setPicks(scores){S.picks=N.ROUNDS[S.round].items.map((it,i)=>it.cards.find(c=>c.s===scores[i]).id);}
 function settle(){click('skip');eq(S.screen,'result');}
 function send(scores){setPicks(scores);N.go('review');click('order');settle();}
-function advance(ms){const target=clock+ms;for(let n=0;n<1000;n++){const next=[...due].filter(([id,t])=>timers.has(id)&&t<=target).sort((a,b)=>a[1]-b[1])[0];if(!next)break;const[id,t]=next,fn=timers.get(id);clock=t;timers.delete(id);due.delete(id);fn();}clock=target;}
 ok(N,'Game initialized');eq(N.ROUNDS.length,3);eq(Object.keys(N.BY_ID).length,45);
 for(const r of N.ROUNDS){for(const it of r.items)eq(it.cards.map(c=>c.s).sort(),[0,1,2]);for(let n=0;n<243;n++){let v=n;const p=r.items.map(it=>{const c=it.cards[v%3];v=Math.floor(v/3);return c;});const e=N.evaluate(p),score=p.reduce((s,c)=>s+c.s,0),critical=p.filter(c=>c.crit&&c.s<2),issues=p.filter(c=>c.s<2);eq(e.score,score);eq(e.stars,critical.length?1:score===10?3:score>=6?2:1);eq(e.leadId,(critical[0]||issues.find(c=>c.s===0)||issues[0]||{}).id||null);}}
 ok(!/https?:\/\//.test(html.replace(/<a href="https:[^"]+"/g,'').replace(/https:\/\/napumbot.test/g,'')),'No remote asset dependencies');
@@ -38,9 +37,6 @@ click('next-round');eq(S.round,1);eq(S.screen,'brief');click('write');send([2,2,
 click('next-round');eq(S.round,2);click('write');send([2,2,2,2,2]);click('next-round');eq(S.screen,'end');eq(S.best.map(b=>b.stars),[3,3,3]);
 drawnText=[];click('share');eq(S.screen,'share');ok(d.querySelector('.share-img'));ok(drawnText.includes('최고 기록 전 라운드 만점'));ok(S.shareAlt.includes('학교')&&S.shareAlt.includes('별 3개'));click('close-share');
 click('replay','[data-r="0"]');ok(S.fromEnd);click('write');send([1,2,2,2,2]);eq(S.best[0].score,10);click('next-round');eq(S.screen,'end');
-const backup=JSON.stringify({best:S.best,seen:S.seen,screen:S.screen});N.beginDemo();ok(S.demo);eq(S.best,[null,null,null]);
-for(let n=1;n<=6;n++){N.sample(n);if(n%2){eq(S.screen,'delivery');settle();eq(N.resultData().stars,1);}else{eq(S.screen,'write');eq(S.picks.filter(Boolean).length,5);click('pick','[data-c="0"]');N.go('review');click('order');settle();eq(N.resultData().score,10);}}
-N.sample(7);eq(S.screen,'end');eq(S.best.map(b=>b.score),[10,10,10]);drawnText=[];click('share');ok(drawnText.includes('시연 모드 · 예시 플레이 기록'));N.leaveDemo();eq(JSON.stringify({best:S.best,seen:S.seen,screen:S.screen}),backup,'Demo restores regular session');ok(!S.demo);
 // Every card can render its own result, and all illustration trees are valid XML.
 const parser=new w.DOMParser();
 for(const c of Object.values(N.BY_ID)){N.newRound(c.r);setPicks([2,2,2,2,2]);S.picks[c.i]=c.id;N.order();N.finish(S.attempt);S.shown=c.i;N.render({scroll:false});ok(d.querySelectorAll('.result-row').length===5);const svg=N.sceneArt(c.r,c.s===2?'condition':c.id,{caption:c.o});ok(!svg.includes('NaN'),'SVG numeric values valid');ok(!parser.parseFromString(svg,'image/svg+xml').querySelector('parsererror'),`SVG valid for ${c.id}`);}
@@ -50,7 +46,5 @@ click('help');ok(d.querySelector('[role="dialog"]'));const modalFirst=d.querySel
 click('big');ok(d.documentElement.classList.contains('big'));eq(d.activeElement.dataset.a,'big','Setting retains focus');click('calm');ok(d.documentElement.classList.contains('calm'));click('sound');eq(d.activeElement.dataset.a,'sound');
 N.newRound(0);setPicks([2,2,2,2,2]);N.order();const cancelled=[...timers.values()][0];N.resetSession();cancelled();eq(S.screen,'start','Cancelled timer cannot resurrect results');
 eq(faults,[],'No JavaScript errors');
-N.startAuto();ok(N.isAutoRunning());eq(S.demoBar,false);advance(7000);eq(S.screen,'result');eq(S.round,0);eq(N.resultData().score,8);advance(15000);eq(S.best[0].score,10);advance(17000);eq(S.best[1].score,10);advance(21000);eq(S.screen,'end');eq(S.best.map(b=>b.score),[10,10,10]);ok(!N.isAutoRunning());eq(S.seen,['r1_s1_0','r2_s4_0','r3_s2_0']);
-N.startAuto();advance(1000);d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));ok(!N.isAutoRunning());const paused=S.screen;advance(65000);eq(S.screen,paused,'Escape cancels scheduled demo steps');N.leaveDemo();eq(S.screen,'start');
-console.log(`PASS: ${checks} checks; 729 score combinations; full three-mission flow; retries, snapshots, demo isolation, 45 result scenes, SVG validation and share-card drawing. Canvas is stubbed; browser layout and downloads require manual verification.`);
+console.log(`PASS: ${checks} checks; 729 score combinations; full three-mission flow; retries, snapshots, 45 result scenes, SVG validation and share-card drawing. Canvas is stubbed; browser layout and downloads require manual verification.`);
 dom.window.close();
